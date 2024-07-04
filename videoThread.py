@@ -4,7 +4,6 @@ import numpy as np
 import face_recognition
 import pickle
 from pathlib import Path
-import asyncio
 import matplotlib.pyplot as plt
 import time
 
