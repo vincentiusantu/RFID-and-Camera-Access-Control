@@ -28,12 +28,6 @@ class VideoThread(QThread):
     def run(self):
         # capture from web cam
         cap = cv2.VideoCapture(0)
-        
-        # Default value
-        name = "Unknown"
-        status = "Denied"
-        cv_img = plt.imread("default.jpg")
-        
         while self._run_flag:
             ret, cv_img = cap.read()
             if ret:
