@@ -22,8 +22,7 @@ class VideoGet:
                 self.stop()
             else:
                 (self.grabbed, self.frame) = self.stream.read()
-                if cv2.waitKey(1) == ord("q"):
-                    self.stopped = True
 
     def stop(self):
         self.stopped = True
+        self.stream.release()
