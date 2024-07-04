@@ -6,6 +6,7 @@ import pickle
 from pathlib import Path
 import matplotlib.pyplot as plt
 import time
+from VideoGet import VideoGet
 
 encodings_location = Path("output/encodings.isiot")
 
@@ -27,9 +28,17 @@ class VideoThread(QThread):
 
     def run(self):
         # capture from web cam
-        cap = cv2.VideoCapture(0)
+        video_getter = VideoGet(0).start()
+        # cap = cv2.VideoCapture("rtsp://admin:labiot2022@192.168.1.200/live/ch00_01")
+        name = "Unknown"
+        status = "Denied"
+        cv_img = plt.imread("default.jpg")
         while self._run_flag:
-            ret, cv_img = cap.read()
+            if video_getter.stopped:
+                video_getter.stop()
+                break
+            cv_img = video_getter.frame
+            ret = video_getter.grabbed
             if ret:
                 if self.process_current_frame:
                 # Resize frame of video to 1/4 size for faster face recognition processing
@@ -80,7 +89,7 @@ class VideoThread(QThread):
                 self.change_status_signal.emit(status)
                 self.change_pixmap_signal.emit(cv_img)
         # shut down capture system
-        cap.release()
+        video_getter.stop()
 
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
