@@ -1,55 +1,56 @@
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QHBoxLayout
 from PyQt5.QtGui import QPixmap
 import sys
 import cv2
 from PyQt5.QtCore import pyqtSlot, Qt
 import numpy as np
 from videoThread import VideoThread
-from FaceRecognitionThread import FaceRecognition
 
 
 class App(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Qt live label demo")
-        self.disply_width = 640
-        self.display_height = 480
+        self.disply_width = 480
+        self.display_height = 360
         # create the label that holds the image
         self.image_label = QLabel(self)
         self.image_label.resize(self.disply_width, self.display_height)
+        # Set default picture for unknown faces
+        self.image_label.setPixmap(QPixmap("default.jpg"))
         # create a text label
         self.textLabel = QLabel('Webcam')
         self.nameLabel = QLabel('Name: Unknown')
         self.statusLabel = QLabel('Status: Denied')
 
-        # create a vertical box layout and add the two labels
+        # create a vertical box layout and add the three labels
         vbox = QVBoxLayout()
-        vbox.addWidget(self.image_label)
-        vbox.addWidget(self.textLabel)
         vbox.addWidget(self.nameLabel)
-        vbox.addWidget(self.statusLabel)
-        # set the vbox layout as the widgets layout
-        self.setLayout(vbox)
-
+        vbox.addWidget(self.textLabel)
+        vbox.addWidget(self.image_label)
+        
+        # create a horizontal box layout and add vertical layout and status label
+        hbox = QHBoxLayout()
+        hbox.addLayout(vbox)
+        hbox.addWidget(self.statusLabel)
+        self.setLayout(hbox)
         # create the video capture thread
         self.thread = VideoThread()
         # connect its signal to the update_image slot
         self.thread.change_pixmap_signal.connect(self.update_image)
+        self.thread.change_name_signal.connect(self.update_name)
+        self.thread.change_status_signal.connect(self.update_status)
         # start the thread
         self.thread.start()
         
-        self.faceRecognition = FaceRecognition()
-        self.faceRecognition.change_name_signal.connect(self.update_name)
-        self.faceRecognition.change_status_signal.connect(self.update_status)
-        # self.faceRecognition.thread.change_pixmap_signal.connect(self.update_image)
-        self.faceRecognition.start()
 
     def closeEvent(self, event):
+        '''
+        This function is used for handling exit button. So when the button clicked, the program will be stopped immediately
+        '''
         self.thread.stop()
         event.accept()
-
-
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
