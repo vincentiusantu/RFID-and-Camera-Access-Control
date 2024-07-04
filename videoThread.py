@@ -28,7 +28,7 @@ class VideoThread(QThread):
 
     def run(self):
         # capture from web cam
-        video_getter = VideoGet("rtsp://admin:labiot2022@192.168.1.200/live/ch00_01").start()
+        video_getter = VideoGet(0).start()
         # cap = cv2.VideoCapture("rtsp://admin:labiot2022@192.168.1.200/live/ch00_01")
         name = "Unknown"
         status = "Denied"
